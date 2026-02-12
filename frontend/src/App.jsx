@@ -2,76 +2,92 @@ import { useState } from 'react'
 import './App.css'
 
 function App() {
-  const [germanText, setGermanText] = useState('')
-  const [englishText, setEnglishText] = useState('')
-  const [koreanText, setKoreanText] = useState('')
-  const [isTranslating, setIsTranslating] = useState(false)
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [preview, setPreview] = useState(null)
+  const [extractedText, setExtractedText] = useState('')
+  const [isProcessing, setIsProcessing] = useState(false)
 
-  const handleTranslate = async () => {
-    if (!germanText.trim()) {
-      alert('독일어 텍스트를 입력해주세요!')
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setSelectedFile(file)
+      // 미리보기 생성
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setPreview(reader.result)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleOCR = async () => {
+    if (!selectedFile) {
+      alert('이미지를 먼저 선택해주세요!')
       return
     }
 
-    setIsTranslating(true)
-    
-    // 임시로 가짜 번역 (나중에 AI API로 교체)
-    setTimeout(() => {
-      setEnglishText(`[English translation of: ${germanText}]`)
-      setKoreanText(`[한국어 번역: ${germanText}]`)
-      setIsTranslating(false)
-    }, 1000)
-  }
+    setIsProcessing(true)
+    const formData = new FormData()
+    formData.append('image', selectedFile)
 
-  const handleSave = () => {
-    alert('저장 기능은 나중에 구현할게요!')
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/ocr', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        setExtractedText(data.text)
+      } else {
+        alert('OCR 처리 실패: ' + data.error)
+      }
+    } catch (error) {
+      alert('오류 발생: ' + error.message)
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   return (
     <div className="container">
-      <h1>🇩🇪 Wagner Translator</h1>
+      <h1>🇩🇪 Wagner OCR</h1>
       
-      <div className="section">
-        <label>독일어 텍스트 입력:</label>
-        <textarea
-          value={germanText}
-          onChange={(e) => setGermanText(e.target.value)}
-          placeholder="독일어 텍스트를 입력하세요..."
-          rows="4"
+      <div className="upload-section">
+        <label htmlFor="file-upload" className="file-label">
+          📸 이미지 선택
+        </label>
+        <input
+          id="file-upload"
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          style={{ display: 'none' }}
         />
       </div>
 
-      <button 
-        onClick={handleTranslate} 
-        disabled={isTranslating}
-        className="translate-btn"
-      >
-        {isTranslating ? '번역 중...' : '🔄 번역하기'}
-      </button>
+      {preview && (
+        <div className="preview-section">
+          <h3>미리보기:</h3>
+          <img src={preview} alt="Preview" className="preview-image" />
+          <button onClick={handleOCR} disabled={isProcessing} className="ocr-btn">
+            {isProcessing ? '처리 중...' : '🔍 텍스트 추출'}
+          </button>
+        </div>
+      )}
 
-      <div className="section">
-        <label>영어 번역 (편집 가능):</label>
-        <textarea
-          value={englishText}
-          onChange={(e) => setEnglishText(e.target.value)}
-          placeholder="번역 결과가 여기 표시됩니다..."
-          rows="4"
-        />
-      </div>
-
-      <div className="section">
-        <label>한국어 번역 (편집 가능):</label>
-        <textarea
-          value={koreanText}
-          onChange={(e) => setKoreanText(e.target.value)}
-          placeholder="번역 결과가 여기 표시됩니다..."
-          rows="4"
-        />
-      </div>
-
-      <button onClick={handleSave} className="save-btn">
-        💾 저장하기
-      </button>
+      {extractedText && (
+        <div className="result-section">
+          <h3>추출된 독일어 텍스트:</h3>
+          <textarea
+            value={extractedText}
+            onChange={(e) => setExtractedText(e.target.value)}
+            rows="10"
+            className="result-text"
+          />
+        </div>
+      )}
     </div>
   )
 }
