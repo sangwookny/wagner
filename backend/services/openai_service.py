@@ -24,7 +24,40 @@ def extract_text_from_image(base64_image):
                     "content": [
                         {
                             "type": "text",
-                            "text": "이 이미지에 있는 독일어 텍스트를 정확히 추출해주세요. 텍스트만 반환하고, 설명은 하지 마세요. 줄바꿈 하이픈(= 또는 -)도 그대로 유지해주세요."
+                            "text": """이 이미지를 분석해주세요. 반드시 JSON 형식으로만 응답하세요.
+
+{
+  "has_music_score": true/false,
+  "has_illustration": true/false,
+  "content_blocks": [
+    {
+      "type": "text",
+      "content": "독일어 텍스트 내용"
+    },
+    {
+      "type": "music_score",
+      "description": "악보에 대한 간단한 설명",
+      "crop_percent": {"top": 70, "bottom": 85}
+    }
+  ],
+  "full_text": "페이지의 모든 독일어 텍스트 (악보/그림 제외, 순서대로)"
+}
+
+crop_percent 정확한 측정 방법:
+- 이미지 전체 높이를 100%로 봅니다
+- top: 악보/그림의 첫 픽셀이 시작되는 높이 위치 (%)
+- bottom: 악보/그림의 마지막 픽셀이 끝나는 높이 위치 (%)
+- 중요: 악보/그림 자체의 시작과 끝을 정확히 잡아주세요
+- 악보 위의 텍스트나 아래의 텍스트는 포함하지 마세요
+- 예시: 페이지 상단 1/4이 그림이면 {"top": 0, "bottom": 25}
+- 예시: 페이지 하단에 악보가 있으면 {"top": 75, "bottom": 88}
+- 여유 마진은 넣지 마세요, 정확한 위치만 알려주세요
+
+기타 규칙:
+- content_blocks는 페이지 위에서 아래로 순서대로 나열
+- 텍스트는 정확히 추출하되 줄바꿈 하이픈(= 또는 -)도 그대로 유지
+- 악보/그림이 없으면 content_blocks에 text 블록만 포함
+- 반드시 유효한 JSON으로 응답하세요"""
                         },
                         {
                             "type": "image_url",
@@ -35,11 +68,47 @@ def extract_text_from_image(base64_image):
                     ]
                 }
             ],
-            max_tokens=2000
+            max_tokens=3000
         )
-        return response.choices[0].message.content
+        result = response.choices[0].message.content.strip()
+        if result.startswith('```json'):
+            result = result[7:-3].strip()
+        elif result.startswith('```'):
+            result = result[3:-3].strip()
+        parsed = json.loads(result)
+        return parsed
     except Exception as e:
-        raise Exception(f"OCR failed: {str(e)}")
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "이 이미지에 있는 독일어 텍스트를 정확히 추출해주세요. 텍스트만 반환하고, 설명은 하지 마세요."
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                max_tokens=2000
+            )
+            text = response.choices[0].message.content
+            return {
+                "has_music_score": False,
+                "has_illustration": False,
+                "content_blocks": [{"type": "text", "content": text}],
+                "full_text": text
+            }
+        except Exception as e2:
+            raise Exception(f"OCR failed: {str(e2)}")
 
 
 def translate_to_korean(german_text):
