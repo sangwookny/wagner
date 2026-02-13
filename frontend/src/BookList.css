@@ -1,0 +1,205 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap');
+
+.bl-container {
+  min-height: 100vh;
+  background: #f8f6f1;
+  display: flex;
+  flex-direction: column;
+}
+
+.bl-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f6f1;
+}
+
+.bl-spinner {
+  width: 30px;
+  height: 30px;
+  border: 2px solid #e2ddd5;
+  border-top-color: #8b7e6a;
+  border-radius: 50%;
+  animation: blSpin 1s linear infinite;
+}
+
+@keyframes blSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.bl-header {
+  text-align: center;
+  padding: 80px 30px 40px;
+}
+
+.bl-logo {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 28px;
+  background: #2c2417;
+  color: #f8f6f1;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2em;
+  font-weight: 300;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0;
+}
+
+.bl-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.4em;
+  font-weight: 300;
+  color: #2c2417;
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+}
+
+.bl-subtitle {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 0.95em;
+  color: #8b7e6a;
+  font-weight: 300;
+  letter-spacing: 2px;
+}
+
+.bl-line {
+  width: 50px;
+  height: 1px;
+  background: #c4bbb0;
+  margin: 35px auto 0;
+}
+
+.bl-main {
+  flex: 1;
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.bl-empty {
+  text-align: center;
+  font-family: 'Noto Serif KR', serif;
+  color: #a89e91;
+  font-size: 1em;
+  font-weight: 300;
+  padding: 60px 0;
+}
+
+.bl-books {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bl-book {
+  display: flex;
+  align-items: center;
+  background: #fffef9;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.bl-book:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.bl-book-spine {
+  width: 6px;
+  min-height: 90px;
+  background: linear-gradient(180deg, #5c5347, #8b7e6a);
+  flex-shrink: 0;
+}
+
+.bl-book:nth-child(2n) .bl-book-spine {
+  background: linear-gradient(180deg, #6b5b4e, #a89474);
+}
+
+.bl-book:nth-child(3n) .bl-book-spine {
+  background: linear-gradient(180deg, #4a5568, #718096);
+}
+
+.bl-book-body {
+  flex: 1;
+  padding: 22px 24px;
+}
+
+.bl-book-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 1.15em;
+  font-weight: 500;
+  color: #2c2417;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.bl-book-author {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 0.88em;
+  color: #8b7e6a;
+  font-weight: 300;
+  margin-bottom: 8px;
+}
+
+.bl-book-meta {
+  display: flex;
+  gap: 8px;
+  font-family: 'Noto Serif KR', serif;
+  font-size: 0.78em;
+  color: #a89e91;
+  font-weight: 300;
+}
+
+.bl-book-arrow {
+  padding: 0 24px;
+  font-size: 1.2em;
+  color: #c4bbb0;
+  transition: all 0.3s;
+}
+
+.bl-book:hover .bl-book-arrow {
+  color: #5c5347;
+  transform: translateX(4px);
+}
+
+.bl-footer {
+  text-align: center;
+  padding: 40px 30px 50px;
+}
+
+.bl-footer p {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.9em;
+  color: #c4bbb0;
+  letter-spacing: 2px;
+  font-weight: 400;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .bl-header {
+    padding: 50px 20px 30px;
+  }
+
+  .bl-title {
+    font-size: 1.8em;
+    letter-spacing: 2px;
+  }
+
+  .bl-logo {
+    width: 52px;
+    height: 52px;
+    font-size: 1.6em;
+  }
+}
